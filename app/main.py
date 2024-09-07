@@ -8,17 +8,15 @@ def match_pattern(input_line, pattern):
     if len(pattern) == 1:
         return pattern in input_line
     elif pattern == "\\d":
-        for char in input_line:
-            if char.isdigit():
-                return True
-        return False
+        return any(char.isdigit() for char in input_line)
+    elif pattern == "\\w":
+        return input_line.isalnum()
     else:
         raise RuntimeError(f"Unhandled pattern: {pattern}")
 
 
 def main():
     pattern = sys.argv[2]
-    print(pattern)
     input_line = sys.stdin.read()
 
     if sys.argv[1] != "-E":
