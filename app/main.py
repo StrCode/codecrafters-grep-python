@@ -11,8 +11,10 @@ def match_pattern(input_line, pattern):
         return any(char.isdigit() for char in input_line)
     elif pattern == "\\w":
         return input_line.isalnum()
-    elif pattern.startswith("[") and pattern.endswith("]"):
-        return any(char in input_line for char in pattern.strip("[]"))
+    elif pattern.startswith("[^", 0, 2) and pattern.endswith("]"):
+        return any(char not in pattern.strip("[^]") for char in input_line)
+    elif pattern.startswith("[", 0, 1) and pattern.endswith("]"):
+        return any(char in pattern.strip("[]") for char in input_line)
     else:
         raise RuntimeError(f"Unhandled pattern: {pattern}")
 
