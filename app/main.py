@@ -20,10 +20,11 @@ def match_pattern(input_line, pattern):
 
 
 def match(input_line, pattern):
-    if matchhere(input_line, pattern):
+    if pattern.startswith("^"):
+        return matchhere(input_line, pattern[1:])
+    elif matchhere(input_line, pattern):
         return True
-    else:
-        return False
+    return False
 
 
 def matchhere(input_line, pattern):
