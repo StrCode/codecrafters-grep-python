@@ -11,12 +11,71 @@ def match_pattern(input_line, pattern):
         return any(char.isdigit() for char in input_line)
     elif pattern == "\\w":
         return input_line.isalnum()
-    elif pattern.startswith("[^", 0, 2) and pattern.endswith("]"):
-        return any(char not in pattern.strip("[^]") for char in input_line)
-    elif pattern.startswith("[", 0, 1) and pattern.endswith("]"):
-        return any(char in pattern.strip("[]") for char in input_line)
+    elif pattern[0] == "[" and pattern[-1] == "]":
+        if pattern[1] == "^":
+            return not any(char in pattern for char in input_line)
+        return any(char in pattern for char in input_line)
     else:
         raise RuntimeError(f"Unhandled pattern: {pattern}")
+
+
+def match(input_line, pattern):
+    if matchhere(input_line, pattern):
+        return True
+    else:
+        return False
+
+
+def matchhere(input_line, pattern):
+    if len(input_line) == 0 and len(pattern) > 0:
+        return False
+    elif len(pattern) == 0:
+        return True
+    elif pattern[:2] == "\\d":
+        num = None
+        for i in range(len(input_line)):
+            char = input_line[i]
+            if char.isdigit():
+                num = i
+                break
+        if num is not None:
+            char = input_line[num]
+            return matchhere(input_line[num + 1 :], pattern[2:])
+    elif pattern[:2] == "\\w":
+        num = None
+        for i in range(len(input_line)):
+            char = input_line[i]
+            if char.isalnum():
+                num = i
+                break
+        if num is not None:
+            char = input_line[num]
+            return matchhere(input_line[num + 1 :], pattern[2:])
+    elif pattern[0] == "[":
+        if "]" not in pattern[1:]:
+            return False
+        index = pattern.find("]")
+        result = False
+        if pattern[1] == "^":
+            result = not any(char in pattern[2:index] for char in input_line)
+            if result:
+                return matchhere(input_line, pattern[index + 1 :])
+            else:
+                return False
+        result = any(char in pattern[1:index] for char in input_line)
+        if result:
+            return matchhere(input_line, pattern[index + 1 :])
+        return False
+
+    elif pattern[0]:
+        if pattern[0] != input_line[0]:
+            return False
+        if input_line[1:] is not None:
+            return matchhere(input_line[1:], pattern[1:])
+        else:
+            return False
+    else:
+        return True
 
 
 def main():
@@ -31,7 +90,7 @@ def main():
     print("Logs from your program will appear here!")
 
     # Uncomment this block to pass the first stage
-    if match_pattern(input_line, pattern):
+    if match(input_line, pattern):
         exit(0)
     else:
         exit(1)
