@@ -25,10 +25,13 @@ def match(input_line, pattern):
     elif matchhere(input_line, pattern):
         return True
     return False
+    # raise RuntimeError(f"Unhandled pattern: {pattern}")
 
 
 def matchhere(input_line, pattern):
     if len(input_line) == 0 and len(pattern) > 0:
+        if pattern[0] == "$":
+            return True
         return False
     elif len(pattern) == 0:
         return True
