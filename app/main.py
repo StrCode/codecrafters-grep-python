@@ -4,21 +4,6 @@ import sys
 # import lark - available if you need it!
 
 
-def match_pattern(input_line, pattern):
-    if len(pattern) == 1:
-        return pattern in input_line
-    elif pattern == "\\d":
-        return any(char.isdigit() for char in input_line)
-    elif pattern == "\\w":
-        return input_line.isalnum()
-    elif pattern[0] == "[" and pattern[-1] == "]":
-        if pattern[1] == "^":
-            return not any(char in pattern for char in input_line)
-        return any(char in pattern for char in input_line)
-    else:
-        raise RuntimeError(f"Unhandled pattern: {pattern}")
-
-
 def match(input_line, pattern):
     if pattern.startswith("^"):
         return matchhere(input_line, pattern[1:])
@@ -35,6 +20,10 @@ def matchhere(input_line, pattern):
         return False
     elif len(pattern) == 0:
         return True
+    elif len(pattern) > 1 and pattern[1] == "+":
+        while input_line[0] == pattern[0]:
+            input_line = input_line[1:]
+        return matchhere(input_line, pattern[2:])
     elif pattern[:2] == "\\d":
         num = None
         for i in range(len(input_line)):
@@ -70,7 +59,6 @@ def matchhere(input_line, pattern):
         if result:
             return matchhere(input_line, pattern[index + 1 :])
         return False
-
     elif pattern[0]:
         if pattern[0] != input_line[0]:
             return False
@@ -95,8 +83,10 @@ def main():
 
     # Uncomment this block to pass the first stage
     if match(input_line, pattern):
+        print("True")
         exit(0)
     else:
+        print("False")
         exit(1)
 
 
