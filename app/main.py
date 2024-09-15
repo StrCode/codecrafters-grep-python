@@ -6,6 +6,8 @@ import sys
 
 def match(input_line, pattern):
     if pattern.startswith("^"):
+        if not (start_of_line(input_line, pattern[1:])):
+            return False
         return matchhere(input_line, pattern[1:])
     elif matchhere(input_line, pattern):
         return True
@@ -14,6 +16,7 @@ def match(input_line, pattern):
 
 
 def matchhere(input_line, pattern):
+    print(f"Starting input_line: {input_line}, pattern: {pattern}")
     if len(input_line) == 0 and len(pattern) > 0:
         if pattern[0] == "$":
             return True
@@ -21,6 +24,12 @@ def matchhere(input_line, pattern):
     elif len(pattern) == 0:
         return True
     elif len(pattern) > 1 and pattern[1] == "+":
+        if pattern[0] != input_line[0]:
+            return False
+        while input_line[0] == pattern[0]:
+            input_line = input_line[1:]
+        return matchhere(input_line, pattern[2:])
+    elif len(pattern) > 1 and pattern[1] == "?":
         while input_line[0] == pattern[0]:
             input_line = input_line[1:]
         return matchhere(input_line, pattern[2:])
@@ -60,14 +69,27 @@ def matchhere(input_line, pattern):
             return matchhere(input_line, pattern[index + 1 :])
         return False
     elif pattern[0]:
-        if pattern[0] != input_line[0]:
+        if pattern[0] != input_line[0] and len(input_line) < 2:
             return False
-        if input_line[1:] is not None:
+        elif pattern[0] != input_line[0] and input_line[1:] is not None:
+            print("samuel")
+            print(input_line[1:])
+            print(pattern)
+            return matchhere(input_line[1:], pattern)
+        elif pattern[0] == input_line[0] and input_line[1:] is not None:
+            return matchhere(input_line[1:], pattern[1:])
+        elif pattern[0] == input_line[0]:
             return matchhere(input_line[1:], pattern[1:])
         else:
             return False
     else:
         return True
+
+
+def start_of_line(input_line, pattern):
+    if input_line[0] != pattern[0]:
+        return False
+    return True
 
 
 def main():
