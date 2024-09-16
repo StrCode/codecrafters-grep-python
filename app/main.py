@@ -16,7 +16,6 @@ def match(input_line, pattern):
 
 
 def matchhere(input_line, pattern):
-    print(f"Starting input_line: {input_line}, pattern: {pattern}")
     if len(input_line) == 0 and len(pattern) > 0:
         if pattern[0] == "$":
             return True
@@ -33,6 +32,8 @@ def matchhere(input_line, pattern):
         while input_line[0] == pattern[0]:
             input_line = input_line[1:]
         return matchhere(input_line, pattern[2:])
+    elif pattern[0] == ".":
+        return matchhere(input_line[1:], pattern[1:])
     elif pattern[:2] == "\\d":
         num = None
         for i in range(len(input_line)):
@@ -72,9 +73,6 @@ def matchhere(input_line, pattern):
         if pattern[0] != input_line[0] and len(input_line) < 2:
             return False
         elif pattern[0] != input_line[0] and input_line[1:] is not None:
-            print("samuel")
-            print(input_line[1:])
-            print(pattern)
             return matchhere(input_line[1:], pattern)
         elif pattern[0] == input_line[0] and input_line[1:] is not None:
             return matchhere(input_line[1:], pattern[1:])
@@ -105,10 +103,8 @@ def main():
 
     # Uncomment this block to pass the first stage
     if match(input_line, pattern):
-        print("True")
         exit(0)
     else:
-        print("False")
         exit(1)
 
 
