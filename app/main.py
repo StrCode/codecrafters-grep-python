@@ -6,7 +6,7 @@ import sys
 
 def match(input_line, pattern):
     if pattern.startswith("^"):
-        if not (start_of_line(input_line, pattern[1:])):
+        if not start_of_line(input_line, pattern[1:]):
             return False
         return matchhere(input_line, pattern[1:])
     elif matchhere(input_line, pattern):
@@ -28,6 +28,19 @@ def matchhere(input_line, pattern):
         while input_line[0] == pattern[0]:
             input_line = input_line[1:]
         return matchhere(input_line, pattern[2:])
+    elif pattern[0] == "(":
+        end_bracket_index = pattern.find(")")
+        if "|" in pattern[:end_bracket_index]:
+            alternation_index = pattern.find("|")
+            first_word = pattern[1:alternation_index]
+            second_word = pattern[alternation_index + 1 : end_bracket_index]
+
+            result = matchhere(input_line, first_word) or matchhere(
+                input_line, second_word
+            )
+            if result:
+                return matchhere(input_line, pattern[end_bracket_index + 1 :])
+
     elif len(pattern) > 1 and pattern[1] == "?":
         while input_line[0] == pattern[0]:
             input_line = input_line[1:]
