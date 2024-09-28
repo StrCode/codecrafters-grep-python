@@ -19,7 +19,6 @@ def match_here(input_line, pattern):
     while len(pattern) != 0:
         if pattern[0] == "[":
             index = pattern.find("]")
-            print(index)
             result = any([char in pattern[line_number:index] for char in input_line])
             if pattern[1] == "^":
                 result = not result
@@ -32,8 +31,31 @@ def match_here(input_line, pattern):
             pattern = pattern[1:]
             result = True
 
+        elif pattern[:2].endswith("+"):
+            print(pattern[:2])
+            prefix = pattern[0]
+            print(prefix)
+            print("line number", input_line[line_number])
+            if pattern[0] != input_line[line_number]:
+                result = False
+                break
+            while prefix == input_line[line_number]:
+                line_number += 1
+            result = True
+            input_line[line_number:]
+            pattern = pattern[2:]
+
+        elif pattern[:2].endswith("?"):
+            prefix = pattern[0]
+            print(prefix)
+            if pattern[0] == input_line[line_number]:
+                line_number += 1
+            print(input_line[line_number:])
+            result = True
+            print("input line", input_line[line_number:])
+            pattern = pattern[2:]
+
         elif pattern[0] == "$":
-            print(pattern, input_line[line_number:])
             if len(input_line[line_number:]) > 0:
                 result = False
             else:
@@ -59,12 +81,11 @@ def match_here(input_line, pattern):
                     break
 
         elif len(pattern) > 0:
-            print(pattern[0], input_line[line_number])
             if pattern[0] != input_line[line_number]:
                 result = False
-            pattern = pattern[1:]
+            else:
+                pattern = pattern[1:]
             line_number += 1
-
         else:
             return False
 
