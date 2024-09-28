@@ -31,6 +31,12 @@ def match_here(input_line, pattern):
             pattern = pattern[1:]
             result = True
 
+        elif pattern[0] == ".":
+            line_number += 1
+            pattern = pattern[1:]
+            result = True
+            print(pattern, input_line[line_number:])
+
         elif pattern[:2].endswith("+"):
             print(pattern[:2])
             prefix = pattern[0]
@@ -86,6 +92,7 @@ def match_here(input_line, pattern):
             else:
                 pattern = pattern[1:]
             line_number += 1
+
         else:
             return False
 
