@@ -1,5 +1,7 @@
 import sys
 
+from app.try1 import matchhere
+
 # import pyparsing - available if you need it!
 # import lark - available if you need it!
 
@@ -23,6 +25,35 @@ def match_here(input_line, pattern):
             if pattern[1] == "^":
                 result = not result
             pattern = pattern[index + 1 :]
+
+        elif pattern[0] == "(":
+            index = pattern.find(")")
+
+            if "|" in pattern[1:index]:
+                separator = pattern[1:index].find("|")
+                first_word = pattern[1 : separator + 1]
+                second_word = pattern[separator + 2 : index]
+
+                print(first_word, second_word)
+
+                f_w_result = matchhere(input_line, first_word)
+                s_w_result = matchhere(input_line, second_word)
+
+                print(f_w_result)
+                print(s_w_result)
+
+                if not (f_w_result or s_w_result):
+                    return False
+
+                if f_w_result:
+                    pattern = first_word + pattern[index + 1 :]
+
+                if s_w_result:
+                    pattern = second_word + pattern[index + 1 :]
+
+                print(pattern)
+
+                result = True
 
         elif pattern[0] == "^":
             if pattern[1] != input_line[line_number]:
