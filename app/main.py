@@ -32,6 +32,14 @@ def match_here(input_line, pattern):
             pattern = pattern[1:]
             result = True
 
+        elif pattern[0] == "$":
+            print(pattern, input_line[line_number:])
+            if len(input_line[line_number:]) > 0:
+                result = False
+            else:
+                result = True
+            pattern = pattern[1:]
+
         elif pattern[:2] == "\\d":
             pattern = pattern[2:]
             while len(input_line[line_number:]) > 0:
@@ -49,16 +57,17 @@ def match_here(input_line, pattern):
                 if char.isalnum():
                     result = True
                     break
+
         elif len(pattern) > 0:
             print(pattern[0], input_line[line_number])
             if pattern[0] != input_line[line_number]:
                 result = False
             pattern = pattern[1:]
             line_number += 1
+
         else:
             return False
-    print("here am i")
-    print("Result", result)
+
     return result
 
 
