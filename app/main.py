@@ -51,8 +51,6 @@ def match_here(input_line, pattern):
                 if s_w_result:
                     pattern = second_word + pattern[index + 1 :]
 
-                print(pattern)
-
                 result = True
 
         elif pattern[0] == "^":
