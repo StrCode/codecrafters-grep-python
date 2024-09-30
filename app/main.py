@@ -1,7 +1,5 @@
 import sys
 
-from app.try1 import matchhere
-
 # import pyparsing - available if you need it!
 # import lark - available if you need it!
 
@@ -51,18 +49,17 @@ def match_here(input_line, pattern):
                 and pattern[index + 1]
                 and pattern[index + 1] == "+"
             ):
-                print("Samuel")
-                print("Testing Pattern", pattern[1:index])
-                print("Testing Input", input_line)
-
-                for char in pattern[1:index]:
-                    if (
-                        len(input_line[line_number:]) > 0
-                        and char in input_line[line_number]
-                    ):
-                        input_line = input_line[1:]
+                for char in pattern[2:index]:
+                    if len(input_line[line_number:]) == 0:
+                        result = False
+                        break
+                    elif char not in input_line[line_number]:
+                        print("char", char, "inputline", input_line[line_number])
+                        line_number += 1
+                        result = True
                     else:
-                        return False
+                        result = False
+                        break
 
                 pattern = pattern[index + 2 :]
                 break
@@ -92,10 +89,15 @@ def match_here(input_line, pattern):
                 and pattern[index + 1] == "+"
             ):
                 for char in pattern[1:index]:
-                    if len(input_line) > 0 and char in input_line[0]:
-                        input_line = input_line[1:]
+                    if len(input_line[line_number:]) == 0:
+                        result = False
+                        break
+                    elif char in input_line[line_number]:
+                        line_number += 1
+                        result = True
                     else:
-                        return False
+                        result = False
+                        break
 
                 pattern = pattern[index + 2 :]
                 break
@@ -122,8 +124,8 @@ def match_here(input_line, pattern):
                 first_word = pattern[1 : separator + 1]
                 second_word = pattern[separator + 2 : index]
 
-                f_w_result = matchhere(input_line, first_word)
-                s_w_result = matchhere(input_line, second_word)
+                f_w_result = match_pattern(input_line, first_word)
+                s_w_result = match_pattern(input_line, second_word)
 
                 if not (f_w_result or s_w_result):
                     return False
@@ -143,26 +145,51 @@ def match_here(input_line, pattern):
             print("input to search", input_line[line_number:])
 
             found = False
-            while found is False and i < len(input_line):
-                print(
-                    "Match now:",
-                    input_line[line_number:i],
-                    "Pattern:",
-                    pattern[1:index],
-                )
-                rel = match_pattern(input_line[line_number:i], pattern[1:index])
-                print("main-rel-loop:", rel)
-                if rel:
-                    found = True
-                    result = True
-                    break
-                i += 1
+
+            if pattern[1:index].isalnum():
+                while found is False or i < len(input_line):
+                    print("hit here")
+                    print(
+                        "Match now:",
+                        input_line[line_number:i],
+                        "Pattern:",
+                        pattern[1:index],
+                    )
+                    rel = match_pattern(input_line[line_number:i], pattern[1:index])
+                    print("main=rel:", rel)
+                    if rel:
+                        result = True
+                        found = True
+                        break
+                    i += 1
+
+            else:
+                while i < len(input_line):
+                    print(
+                        "Match now:",
+                        input_line[line_number:i],
+                        "Pattern:",
+                        pattern[1:index],
+                    )
+                    rel = match_pattern(input_line[line_number:i], pattern[1:index])
+                    print("sam-main=rel:", rel)
+                    if rel:
+                        found = True
+                    else:
+                        i += 1
+                        if found is True:
+                            result = True
+                            break
 
             groups.append(input_line[line_number:i])
             print("Next stage:", pattern[index + 1 :])
             pattern = pattern[index + 1 :]
             line_number = i
             print("next input line:", input_line[line_number:], "Groups:", groups)
+
+        elif pattern.startswith("^("):
+            pattern = pattern[1:]
+            result = True
 
         elif pattern[0] == "^":
             if pattern[1] != input_line[line_number]:
@@ -178,6 +205,53 @@ def match_here(input_line, pattern):
             line_number += 1
             pattern = pattern[1:]
             result = True
+
+        elif pattern[:2] == "\\d":
+            pattern = pattern[2:]
+
+            if pattern[:2].endswith("+"):
+                while input_line[line_number].isdigit():
+                    line_number += 1
+                result = True
+                input_line[line_number:]
+                pattern = pattern[2:]
+                break
+
+            if len(input_line[line_number:]) == 0:
+                result = False
+                break
+
+            if input_line[line_number].isdigit():
+                line_number += 1
+                result = True
+            else:
+                result = False
+
+        elif pattern[:2] == "\\w":
+            pattern = pattern[2:]
+
+            if pattern[:2].endswith("+"):
+                print("we just got it here and i have this")
+                while (
+                    len(input_line[line_number:]) != 0
+                    and input_line[line_number].isalnum()
+                ):
+                    line_number += 1
+                    result = True
+                if len(input_line[line_number:]) == 0:
+                    result = True
+                    break
+
+            if len(input_line[line_number:]) == 0:
+                result = False
+                break
+
+            if input_line[line_number].isalnum() and not pattern[:2].endswith("+"):
+                line_number += 1
+                result = True
+            else:
+                result = False
+                break
 
         elif pattern[:2].endswith("+"):
             prefix = pattern[0]
@@ -204,54 +278,11 @@ def match_here(input_line, pattern):
                 result = True
             pattern = pattern[1:]
 
-        elif pattern[:2] == "\\d":
-            pattern = pattern[2:]
-
-            # while len(input_line[line_number:]) > 0:
-            #     char = input_line[line_number]
-            #     line_number += 1
-            #     if char.isdigit():
-            #         result = True
-            #         break
-            #     else:
-            #         result = False
-            #         break
-
-            if len(input_line[line_number:]) == 0:
-                result = False
-                break
-
-            if input_line[line_number].isdigit():
-                line_number += 1
-                result = True
-            else:
-                result = False
-
-        elif pattern[:2] == "\\w":
-            pattern = pattern[2:]
-
-            # while len(input_line[line_number:]) > 0:
-            #     char = input_line[line_number]
-            #     line_number += 1
-            #     if char.isalnum():
-            #         result = True
-            #         break
-            #     else:
-            #         result = False
-            if len(input_line[line_number:]) == 0:
-                result = False
-                break
-
-            if input_line[line_number].isalnum():
-                line_number += 1
-                result = True
-            else:
-                result = False
-                break
-
         elif len(pattern) > 0:
             if len(input_line[line_number:]) == 0 and len(pattern) > 0:
-                print("i am here ")
+                result = False
+                break
+            elif len(pattern) == 0 and len(input_line[line_number:]) > 0:
                 result = False
                 break
             elif pattern[0] != input_line[line_number]:
@@ -263,7 +294,7 @@ def match_here(input_line, pattern):
             line_number += 1
 
         else:
-            return False
+            return result
 
     return result
 
@@ -281,8 +312,10 @@ def main():
 
     # Uncomment this block to pass the first stage
     if match_pattern(input_line, pattern):
+        print("True")
         exit(0)
     else:
+        print("False")
         exit(1)
 
 
